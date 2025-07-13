@@ -134,7 +134,7 @@ export default function LessonViewer() {
           li: ({ node, ...props }) => <li {...props} className="mb-2 text-gray-200" />,
           code: ({ node, inline, className, children, ...props }: CodeProps) => {
             return !inline ? (
-              <pre className="bg-zinc-800 text-sm rounded-md p-4 overflow-x-auto mb-4 border border-zinc-700">
+              <pre {...props} className="bg-zinc-800 text-sm rounded-md p-4 overflow-x-auto mb-4 border border-zinc-700">
                 <code className="text-gray-100">{children}</code>
               </pre>
             ) : (
