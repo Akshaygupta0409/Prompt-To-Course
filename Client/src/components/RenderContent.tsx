@@ -10,6 +10,7 @@ import axios from "axios";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
+import { ScrollArea } from "@radix-ui/react-scroll-area";
 
 
 
@@ -71,7 +72,7 @@ export default function LessonViewer() {
     
     if (!isValidTitle(lessonTitle) || !isValidTitle(moduleTitle) || !isValidTitle(courseTitle)) {
         return (
-            <div className="flex items-center justify-center h-64 bg-zinc-900">
+            <div className="flex items-center justify-center h-64 bg-neutral-900">
                 <div className="text-center">
                     <h3 className="text-lg font-medium text-gray-100 mb-2">
                         Select a Lesson
@@ -86,7 +87,7 @@ export default function LessonViewer() {
 
     if (loading) {
         return (
-            <div className="h-full flex items-center justify-center bg-zinc-900">
+            <div className="h-full flex items-center justify-center bg-neutral-900">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
                     <h1 className="text-lg font-medium text-gray-200">Generating Lesson.....</h1>
@@ -98,7 +99,8 @@ export default function LessonViewer() {
         );
     }
   return (
-    <div className="h-full p-8 bg-zinc-900 text-base leading-relaxed">
+    <div className="h-full p-8 bg-neutral-900 text-base">
+      <ScrollArea className="h-full custom-scrollbar overflow-y-auto">    
       <ReactMarkdown
         children={content}
         remarkPlugins={[remarkGfm]}
@@ -134,11 +136,11 @@ export default function LessonViewer() {
           li: ({ node, ...props }) => <li {...props} className="mb-2 text-gray-200" />,
           code: ({ node, inline, className, children, ...props }: CodeProps) => {
             return !inline ? (
-              <pre className="bg-zinc-800 text-sm rounded-md p-4 overflow-x-auto mb-4 border border-zinc-700">
-                <code className="text-gray-100">{children}</code>
+              <pre className="bg-neutral-800 text-sm rounded-md p-4 overflow-x-auto mb-4 border border-zinc-700">
+                <code className="text-gray-100" {...props}>{children}</code>
               </pre>
             ) : (
-              <code className="bg-zinc-800 text-sm px-2 py-1 rounded text-gray-100 border border-zinc-700">
+              <code className="bg-neutral-800 text-sm px-2 py-1 rounded text-gray-100 border border-zinc-700">
                 {children}
               </code>
             );
@@ -146,7 +148,7 @@ export default function LessonViewer() {
           blockquote: ({ node, ...props }) => (
             <blockquote
               {...props}
-              className="border-l-4 border-zinc-600 pl-4 italic text-gray-300 bg-zinc-800/50 py-2 rounded-r-md mb-4"
+              className="border-l-4 border-zinc-600 pl-4 italic text-gray-300 bg-neutral-900/50 py-2 rounded-r-md mb-4"
             />
           ),
           strong: ({ node, ...props }) => (
@@ -160,6 +162,7 @@ export default function LessonViewer() {
           ),
         }}
       />
+    </ScrollArea>
     </div>
   );
 }
