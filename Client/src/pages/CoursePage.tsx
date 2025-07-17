@@ -1,6 +1,5 @@
 "use client"
 
-
 import AppSidebar from "../components/appsidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import LessonViewer from "../components/RenderContent";
