@@ -2,7 +2,7 @@ name: Build and push Docker image to Docker Hub
 
 on:
   push:
-    branches: [ "v1" ]  # Trigger on pushes to the main branch
+    branches: [ "v1"  ]  # Trigger on pushes to the main branch
 
 jobs:
   build:
@@ -17,10 +17,10 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build and push Docker image
+      - name: Build and push backend Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./backend/app
-          dockerfile: Dockerfile.backend
+          context: .
+          file: ./docker/Dockerfile.backend
           push: true
           tags: akshay0409/prompt-to-course:${{ github.sha }}
