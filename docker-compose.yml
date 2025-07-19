@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  ptc-backend:
+    image: ptc-backend
+    container_name: ptc-backend
+    build:
+      context: ./backend/app
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    
