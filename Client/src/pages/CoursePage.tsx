@@ -23,7 +23,7 @@ const CoursePage: React.FC = () => {
       
      
       </div>
-     <div className="col-span-4 p-4 text-stone-50 bg-neutral-900 border border-zinc-700 rounded-lg mt-1 ml-1 "> 
+     <div className="col-span-4 p-4 text-stone-50 bg-neutral-900 border border-zinc-700 rounded-lg mt-1 ml-1 mb-1 mr-1"> 
        <div className="flex justify-center items-center">
          <Button className="bg-neutral-800 hover:bg-neutral-700 text-white font-bold ">
           Want help ?

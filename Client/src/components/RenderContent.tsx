@@ -1,6 +1,6 @@
 // components/LessonViewer.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
 import ReactMarkdown from "react-markdown";
 import { currentLessonTitleAtom } from "@/atoms/outillne";
@@ -28,6 +28,7 @@ export default function LessonViewer() {
     const moduleTitle = useRecoilValue(currentModuleTitleAtom);
     const courseTitle = useRecoilValue(currentCourseTitleAtom);
     const generateLesson: string | undefined = import.meta.env.VITE_GENERATE_LESSON;
+    const lessonMap = useRef<Map<string, string>>(new Map());
     
     // Debug logging
     console.log("LessonViewer render:", { lessonTitle, moduleTitle, courseTitle });
@@ -46,7 +47,7 @@ export default function LessonViewer() {
         }
 
         console.log("Making API call with:", { lessonTitle, moduleTitle, courseTitle });
-
+        let inTheLoop = false;
         const fetchLessonContent = async () => {
             try {
                 setLoading(true);
@@ -54,16 +55,30 @@ export default function LessonViewer() {
                     lesson_title: `${courseTitle}, ${moduleTitle}, ${lessonTitle}`
                 });
                 setContent(response.data.content);
+                lessonMap.current.set(lessonTitle, response.data.content);
             } catch (error) {
                 console.error("Error fetching lesson content:", error);
                 setContent("Error loading lesson content. Please try again.");
             } finally {
                 setLoading(false);
+                inTheLoop = true;
             }
         };
-        
-        fetchLessonContent();
-    }, [lessonTitle, moduleTitle, courseTitle]);
+        let lessonContentFound = false;
+        lessonMap.current.forEach((value, key) => {
+          if (key === lessonTitle) {
+            lessonContentFound = true;
+            setContent(value);
+            setLoading(false);
+          }
+        });
+
+        if (lessonContentFound===false) {
+          fetchLessonContent();
+        }
+
+         
+    }, [lessonTitle]);
 
     // More strict validation for rendering
     const isValidTitle = (title: string | null): title is string => {
