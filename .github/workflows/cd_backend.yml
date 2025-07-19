@@ -26,4 +26,4 @@ jobs:
           context: ./backend/app
           dockerfile: Dockerfile.backend
           push: true
-          tags: akshay0409/Prompt-to-course:${{ github.sha }}
+          tags: akshay0409/prompt-to-course:${{ github.sha }}
