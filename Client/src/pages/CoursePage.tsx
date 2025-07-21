@@ -2,7 +2,8 @@
 
 import AppSidebar from "../components/appsidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import LessonViewer from "../components/RenderContent";
+import LessonViewer from "@/components/RenderContent";
+import VideosRender from "@/components/videos";
 
 const CoursePage: React.FC = () => {
   return (
@@ -15,14 +16,24 @@ const CoursePage: React.FC = () => {
       </div>
       {/* main content */}
       <div className="w-full grid grid-cols-16 text-white">
-        <div className="col-span-12 bg-neutral-900">
+        <div className="col-span-12 
+        bg-neutral-900 ">
           <LessonViewer />
         </div>
-        <div className="col-span-4 p-4 text-stone-50 bg-neutral-900 border border-zinc-700 rounded-lg mt-1 ml-1 mb-1 mr-1">
-           resources 
+        <div className="col-span-4 
+        bg-neutral-900 
+      
+        fixed right-0 
+        h-full 
+        min-w-1/5
+       mt-2
+       mb-4
+       mr-2
+        p-2">
+          <VideosRender />
         </div>
       </div>
-      {/* sidebar */}
+      {/* sidebar End*/}
     </div>
   );
 };
