@@ -22,7 +22,7 @@ const CoursePage: React.FC = () => {
         </div>
         <div className="col-span-4 
         bg-neutral-900 
-      
+        border border-neutral-800 rounded-lg
         fixed right-0 
         h-full 
         min-w-1/5
@@ -30,6 +30,7 @@ const CoursePage: React.FC = () => {
        mb-4
        mr-2
         p-2">
+          <div className="text-center  text-lg font-semibold p-2">Related Videos</div>
           <VideosRender />
         </div>
       </div>
