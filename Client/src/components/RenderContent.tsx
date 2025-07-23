@@ -25,7 +25,7 @@ export default function LessonViewer() {
   const lessonTitle = useRecoilValue(currentLessonTitleAtom);
   const moduleTitle = useRecoilValue(currentModuleTitleAtom);
   const courseTitle = useRecoilValue(currentCourseTitleAtom);
-  const generateLesson: string | undefined = process.env.VITE_GENERATE_LESSON;
+  const generateLesson: string | undefined = import.meta.env.VITE_GENERATE_LESSON;
   
   const lessonMap = useRef<Map<string, string>>(new Map());
 
@@ -36,11 +36,20 @@ export default function LessonViewer() {
     courseTitle,
   });
 
+  // to clear the userMap when the component is unmounted
+  useEffect(() => {
+    return () => {
+      lessonMap.current.clear();
+    };
+  }, []);
+  // useEffect to fetch the lesson content
+
   useEffect(() => {
     // More strict validation - check for meaningful content, not just truthy values
     const isValidTitle = (title: string | null): title is string => {
       return title !== null && title.trim().length > 0;
     };
+    
 
     if (
       !isValidTitle(lessonTitle) ||

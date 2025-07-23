@@ -11,7 +11,7 @@ export default function VideosRender(): JSX.Element {
   const [videos, setVideos] = useState<string[]>([]);
   const lessonTitle = useRecoilValue(currentLessonTitleAtom);
   const topic = useRecoilValue(topicAtom);
-  const apikey: string| undefined = process.env.VITE_YOUTUBE_API_KEY;
+  const apikey: string| undefined = import.meta.env.VITE_YOUTUBE_API_KEY;
   const baserurl = "https://www.googleapis.com/youtube/v3/search";
   const videoMap = useRef<Map<string, string[]>>(new Map());
 
@@ -30,7 +30,7 @@ export default function VideosRender(): JSX.Element {
           maxResults: 20, // Get more to filter from
           q: `${topic} ${lessonTitle} tutorial explanation -shorts`,
           type: "video",
-          videoDuration: "medium", // 4-20 minutes
+          videoDuration: "long", // 4-20 minutes
           order: "relevance",
         };
 
