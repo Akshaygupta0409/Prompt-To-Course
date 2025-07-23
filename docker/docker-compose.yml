@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  ptc-backend:
+    image: akshay0409/prompt-to-course:${{ github.sha }}
+    container_name: ptc-backend
+    ports:
+      - "8000:8000"
+    
+  

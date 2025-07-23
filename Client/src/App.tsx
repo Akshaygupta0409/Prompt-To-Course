@@ -3,6 +3,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import CoursePage from "./pages/CoursePage";
 
+ 
+
 
 function App() {
   return (
@@ -12,7 +14,8 @@ function App() {
           <Route path="/" element={<Landing />} />
           <Route path="/course" element={<CoursePage />} />
         </Routes>
-      </BrowserRouter>
+         
+    </BrowserRouter>
     </RecoilRoot>
 
   )

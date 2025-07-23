@@ -1,6 +1,6 @@
 // components/LessonViewer.tsx
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRecoilValue } from "recoil";
 import ReactMarkdown from "react-markdown";
 import { currentLessonTitleAtom } from "@/atoms/outillne";
@@ -11,8 +11,6 @@ import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
 import "highlight.js/styles/github-dark.css";
 
-
-
 interface CodeProps extends React.HTMLAttributes<HTMLElement> {
   node?: any;
   inline?: boolean;
@@ -21,82 +19,119 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
 }
 
 export default function LessonViewer() {
-    const [content, setContent] = useState<string>("");
-    const [loading, setLoading] = useState(false);
-    const lessonTitle = useRecoilValue(currentLessonTitleAtom);
-    const moduleTitle = useRecoilValue(currentModuleTitleAtom);
-    const courseTitle = useRecoilValue(currentCourseTitleAtom);
-    const generateLesson: string | undefined = import.meta.env.VITE_GENERATE_LESSON;
-    
-    // Debug logging
-    console.log("LessonViewer render:", { lessonTitle, moduleTitle, courseTitle });
-    
-    useEffect(() => {
-        // More strict validation - check for meaningful content, not just truthy values
-        const isValidTitle = (title: string | null): title is string => {
-            return title !== null && title.trim().length > 0;
-        };
-        
-        if (!isValidTitle(lessonTitle) || !isValidTitle(moduleTitle) || !isValidTitle(courseTitle)) {
-            console.log("Skipping API call - invalid titles:", { lessonTitle, moduleTitle, courseTitle });
-            setContent("");
-            setLoading(false);
-            return;
-        }
+  const [content, setContent] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const lessonTitle = useRecoilValue(currentLessonTitleAtom);
+  const moduleTitle = useRecoilValue(currentModuleTitleAtom);
+  const courseTitle = useRecoilValue(currentCourseTitleAtom);
+  const generateLesson: string | undefined = import.meta.env
+    .VITE_GENERATE_LESSON;
+  const lessonMap = useRef<Map<string, string>>(new Map());
 
-        console.log("Making API call with:", { lessonTitle, moduleTitle, courseTitle });
+  // Debug logging
+  console.log("LessonViewer render:", {
+    lessonTitle,
+    moduleTitle,
+    courseTitle,
+  });
 
-        const fetchLessonContent = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.post(generateLesson!, { 
-                    lesson_title: `${courseTitle}, ${moduleTitle}, ${lessonTitle}`
-                });
-                setContent(response.data.content);
-            } catch (error) {
-                console.error("Error fetching lesson content:", error);
-                setContent("Error loading lesson content. Please try again.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        fetchLessonContent();
-    }, [lessonTitle, moduleTitle, courseTitle]);
-
-    // More strict validation for rendering
+  useEffect(() => {
+    // More strict validation - check for meaningful content, not just truthy values
     const isValidTitle = (title: string | null): title is string => {
-        return title !== null && title.trim().length > 0;
+      return title !== null && title.trim().length > 0;
     };
-    
-    if (!isValidTitle(lessonTitle) || !isValidTitle(moduleTitle) || !isValidTitle(courseTitle)) {
-        return (
-            <div className="flex items-center justify-center h-64 bg-zinc-900">
-                <div className="text-center">
-                    <h3 className="text-lg font-medium text-gray-100 mb-2">
-                        Select a Lesson
-                    </h3>
-                    <p className="text-gray-300">
-                        Choose a lesson from the sidebar to view its content.
-                    </p>
-                </div>
-            </div>
-        );
+
+    if (
+      !isValidTitle(lessonTitle) ||
+      !isValidTitle(moduleTitle) ||
+      !isValidTitle(courseTitle)
+    ) {
+      console.log("Skipping API call - invalid titles:", {
+        lessonTitle,
+        moduleTitle,
+        courseTitle,
+      });
+      setContent("");
+      setLoading(false);
+      return;
     }
 
-    if (loading) {
-        return (
-            <div className="h-full flex items-center justify-center bg-zinc-900">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
-                    <h1 className="text-lg font-medium text-gray-200">Generating Lesson.....</h1>
-                    <br></br>
-                    <h1 className="text-lg font-medium text-gray-200">{lessonTitle}</h1>
-                    <p className="text-sm text-gray-400 mt-2">This may take up to 30 seconds</p>
-                </div>
-            </div>
-        );
+    console.log("Making API call with:", {
+      lessonTitle,
+      moduleTitle,
+      courseTitle,
+    });
+
+    const fetchLessonContent = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.post(generateLesson!, {
+          lesson_title: `${courseTitle}, ${moduleTitle}, ${lessonTitle}`,
+        });
+        setContent(response.data.content);
+        lessonMap.current.set(lessonTitle, response.data.content);
+      } catch (error) {
+        console.error("Error fetching lesson content:", error);
+        setContent("Error loading lesson content. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    let lessonContentFound = false;
+    lessonMap.current.forEach((value, key) => {
+      if (key === lessonTitle) {
+        lessonContentFound = true;
+        setContent(value);
+        setLoading(false);
+      }
+    });
+
+    if (lessonContentFound === false) {
+      fetchLessonContent();
     }
+  }, [lessonTitle]);
+
+  // More strict validation for rendering
+  const isValidTitle = (title: string | null): title is string => {
+    return title !== null && title.trim().length > 0;
+  };
+
+  if (
+    !isValidTitle(lessonTitle) ||
+    !isValidTitle(moduleTitle) ||
+    !isValidTitle(courseTitle)
+  ) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-neutral-900">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-100 mb-2">
+            Select a Lesson
+          </h3>
+          <p className="text-gray-300">
+            Choose a lesson from the sidebar to view its content.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="h-full flex items-center justify-center bg-neutral-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-4"></div>
+          <h1 className="text-lg font-medium text-gray-200">
+            Generating Lesson.....
+          </h1>
+          <br></br>
+          <h1 className="text-lg font-medium text-gray-200">{lessonTitle}</h1>
+          <p className="text-sm text-gray-400 mt-2">
+            This may take up to 30 seconds
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="h-full p-8 bg-zinc-900 text-base leading-relaxed">
       <ReactMarkdown
