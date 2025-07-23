@@ -1,2 +1,4 @@
 .env
 client/node_modules
+backend/app/__pycache__
+backend/app/venv

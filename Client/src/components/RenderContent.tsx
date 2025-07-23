@@ -25,8 +25,8 @@ export default function LessonViewer() {
   const lessonTitle = useRecoilValue(currentLessonTitleAtom);
   const moduleTitle = useRecoilValue(currentModuleTitleAtom);
   const courseTitle = useRecoilValue(currentCourseTitleAtom);
-  const generateLesson: string | undefined = import.meta.env
-    .VITE_GENERATE_LESSON;
+  const generateLesson: string | undefined = process.env.VITE_GENERATE_LESSON;
+  
   const lessonMap = useRef<Map<string, string>>(new Map());
 
   // Debug logging
