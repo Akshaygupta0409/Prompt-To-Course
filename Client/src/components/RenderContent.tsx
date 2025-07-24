@@ -113,8 +113,8 @@ export default function LessonViewer() {
 
     return () => {
       controller.abort();
-      setContent("");
-      setLoading(true);
+    
+      
     };
   }, [lessonTitle]);
 
