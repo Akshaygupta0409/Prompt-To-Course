@@ -21,12 +21,15 @@ interface CodeProps extends React.HTMLAttributes<HTMLElement> {
 
 export default function LessonViewer() {
   const [content, setContent] = useState<string>("");
-  const [loading, setLoading] = useState(false);
+  // fix this set defautl to ture;
+  const [loading, setLoading] = useState(true);
+  // state variables for the lesson title , module title , course title
   const lessonTitle = useRecoilValue(currentLessonTitleAtom);
   const moduleTitle = useRecoilValue(currentModuleTitleAtom);
   const courseTitle = useRecoilValue(currentCourseTitleAtom);
-  const generateLesson: string | undefined = import.meta.env.VITE_GENERATE_LESSON;
-  
+  const generateLesson: string | undefined = import.meta.env
+    .VITE_GENERATE_LESSON;
+
   const lessonMap = useRef<Map<string, string>>(new Map());
 
   // Debug logging
@@ -36,12 +39,6 @@ export default function LessonViewer() {
     courseTitle,
   });
 
-  // to clear the userMap when the component is unmounted
-  useEffect(() => {
-    return () => {
-      lessonMap.current.clear();
-    };
-  }, []);
   // useEffect to fetch the lesson content
 
   useEffect(() => {
@@ -49,7 +46,6 @@ export default function LessonViewer() {
     const isValidTitle = (title: string | null): title is string => {
       return title !== null && title.trim().length > 0;
     };
-    
 
     if (
       !isValidTitle(lessonTitle) ||
@@ -72,21 +68,34 @@ export default function LessonViewer() {
       courseTitle,
     });
 
+    const controller = new AbortController();
+
     const fetchLessonContent = async () => {
+      setLoading(true);
       try {
-        setLoading(true);
-        const response = await axios.post(generateLesson!, {
-          lesson_title: `${courseTitle}, ${moduleTitle}, ${lessonTitle}`,
-        });
+        const response = await axios.post(
+          generateLesson!,
+          {
+            lesson_title: `${courseTitle}, ${moduleTitle}, ${lessonTitle}`,
+          },
+          { signal: controller.signal }
+        );
         setContent(response.data.content);
         lessonMap.current.set(lessonTitle, response.data.content);
+        setLoading(false);
       } catch (error) {
+        if (axios.isCancel(error)) {
+          console.log("Request canceled");
+          setLoading(true);
+          
+          return;
+        }
         console.error("Error fetching lesson content:", error);
         setContent("Error loading lesson content. Please try again.");
-      } finally {
         setLoading(false);
       }
     };
+
     let lessonContentFound = false;
     lessonMap.current.forEach((value, key) => {
       if (key === lessonTitle) {
@@ -99,6 +108,14 @@ export default function LessonViewer() {
     if (lessonContentFound === false) {
       fetchLessonContent();
     }
+
+    // to clear the userMap when the component is unmounted
+
+    return () => {
+      controller.abort();
+      setContent("");
+      setLoading(true);
+    };
   }, [lessonTitle]);
 
   // More strict validation for rendering
@@ -153,7 +170,7 @@ export default function LessonViewer() {
             h1: ({ node, ...props }) => (
               <h1
                 {...props}
-                className="text-3xl font-bold mt-4 mb-3 text-gray-100"
+                className="text-3xl font-bold mt-4 mb-3 text-gray-100 break-words"
               />
             ),
             h2: ({ node, ...props }) => (

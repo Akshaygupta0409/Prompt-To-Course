@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
 import { currentLessonTitleAtom } from "@/atoms/outillne";
-import { useEffect, useState, type JSX, useRef } from "react"
+import { useEffect, useState, type JSX, useRef } from "react";
 import { useRecoilValue } from "recoil";
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from "axios";
 import { topicAtom } from "@/atoms/topic";
 
@@ -11,13 +11,14 @@ export default function VideosRender(): JSX.Element {
   const [videos, setVideos] = useState<string[]>([]);
   const lessonTitle = useRecoilValue(currentLessonTitleAtom);
   const topic = useRecoilValue(topicAtom);
-  const apikey: string| undefined = import.meta.env.VITE_YOUTUBE_API_KEY;
+  const apikey: string | undefined = import.meta.env.VITE_YOUTUBE_API_KEY;
   const baserurl = "https://www.googleapis.com/youtube/v3/search";
   const videoMap = useRef<Map<string, string[]>>(new Map());
 
-  // running the side effect 
+  // running the side effect
 
   useEffect(() => {
+    const controller = new AbortController();
     // function to fetch videos
     const fetchVideosComprehensive = async () => {
       if (!lessonTitle) return;
@@ -27,14 +28,19 @@ export default function VideosRender(): JSX.Element {
         const searchParams = {
           key: apikey,
           part: "snippet",
-          maxResults: 20, // Get more to filter from
+          maxResults: 20,
           q: `${topic} ${lessonTitle} tutorial explanation -shorts`,
           type: "video",
-          videoDuration: "long", // 4-20 minutes
+          videoDuration: "long",
           order: "relevance",
         };
 
-        const searchResponse = await axios.get(`${baserurl}?${new URLSearchParams(searchParams as any)}`);
+        const searchResponse = await axios.get(
+          `${baserurl}?${new URLSearchParams(searchParams as any)}`,
+          {
+            signal: controller.signal,
+          }
+        );
         const searchData = await searchResponse.data;
 
         if (searchData.items.length === 0) {
@@ -43,11 +49,17 @@ export default function VideosRender(): JSX.Element {
         }
 
         // Step 2: Get detailed info including duration
-        const finalVideoIds = searchData.items.map((item: any) => item.id.videoId);
+        const finalVideoIds = searchData.items.map(
+          (item: any) => item.id.videoId
+        );
 
         setVideos(finalVideoIds);
         videoMap.current.set(lessonTitle, finalVideoIds);
       } catch (error) {
+        if (axios.isCancel(error)) {
+          console.log("Request canceled");
+          return;
+        }
         console.error("Error fetching videos:", error);
       }
     };
@@ -62,22 +74,42 @@ export default function VideosRender(): JSX.Element {
     if (videoIdsFound === false) {
       fetchVideosComprehensive();
     }
+
+    return () => {
+      controller.abort();
+    };
   }, [lessonTitle]);
 
+  if (!lessonTitle) {
+    return (
+      <div className="flex items-center justify-center h-64 bg-neutral-900">
+        <div className="text-center">
+          <p className="text-gray-300 text-sm p-2">
+            Choose a lesson from the sidebar to view its content.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col justify-center items-center overflow-y-auto h-screen ">
+      <div className="flex justify-center items-center text-sm font-bold text-gray-100 mb-4 max-w-xs px-2 text-center break-words">
+        {lessonTitle}
+      </div>
       <ScrollArea className="h-screen overflow-y-auto">
-      
-
         <div className="flex flex-col justify-center items-center mb-4">
           {videos?.map((videoId) => (
             <div
               key={videoId}
               className="cursor-pointer mb-4 relative group"
-              onClick={() => window.open(`https://www.youtube.com/watch?v=${videoId}`, '_blank')}
+              onClick={() =>
+                window.open(
+                  `https://www.youtube.com/watch?v=${videoId}`,
+                  "_blank"
+                )
+              }
             >
-
               <iframe
                 width="260"
                 height="160"
@@ -96,7 +128,5 @@ export default function VideosRender(): JSX.Element {
         </div>
       </ScrollArea>
     </div>
-
-
-  )
+  );
 }
