@@ -13,9 +13,6 @@ COPY ./backend/app /app
 # Create .env file if it doesn't exist
 RUN touch /app/.env
 
-# Optionally copy .env if it exists in the build context
-# This will not fail if .env doesn't exist
-COPY ./backend/app/.env /app/.env 
 
 EXPOSE 8000
 
